@@ -8,13 +8,13 @@ import re
 import os
 from PIL import Image
 
-trainName = ['']
+trainName = []
 player = ''
-trainDate = '' #'2018-02-17'
+trainDateList = []
 fromStationName = ''
 toStationName = ''
 #硬座 : '1', 一等 : 'M', 二等 : 'O',  硬卧 : '3', 软卧 : '4'         
-chooseSeat = ['M','O']
+chooseSeat = ['O','4']
 
 seatChange = {'O':30, 'M':31, '1':29, '3':28, '4':23}
 headers = {
@@ -43,7 +43,7 @@ def whileTrue(fn):
                 break
             except:
                 #print(msg, err)
-                time.sleep(0.1+errorTimes/10)
+                time.sleep(0.1+err/10)
                 err += 1
     return whileTruefun
 
@@ -63,6 +63,7 @@ class Train(object):
         self.session = requests.session()
         self.session.headers = headers
         self.session.verify = False
+        self.trainDate = ''
         self.fromStationCode = ''
         self.toStationCode = ''
         self.fromStationTelecode = ''
@@ -193,9 +194,12 @@ class Train(object):
     @whileTrue
     def findTicket(self, *args):
         retimes = -1
-        queryUrl = 'https://kyfw.12306.cn/otn/leftTicket/queryZ?leftTicketDTO.train_date={}&leftTicketDTO.from_station={}&leftTicketDTO.to_station={}&purpose_codes=ADULT'.format(
-            trainDate, self.fromStationCode, self.toStationCode)
         while True:
+            dataLen = len(trainDateList)
+            trainDate = trainDateList[(retimes+1)%dataLen]
+            queryUrl = 'https://kyfw.12306.cn/otn/leftTicket/queryZ?leftTicketDTO.train_date={}&leftTicketDTO.from_station={}&leftTicketDTO.to_station={}&purpose_codes=ADULT'.format(
+            trainDate, self.fromStationCode, self.toStationCode)
+            self.trainDate = trainDate
             self.getjsonurl = queryUrl
             self.getjson('查询出现错误，退出程序', 30)
             trainList = self.getjsonback['data']['result']
@@ -285,7 +289,7 @@ class Train(object):
         url = 'https://kyfw.12306.cn/otn/leftTicket/submitOrderRequest'
         data = {
             'secretStr':self.trainSecretStr,
-            'train_date':trainDate,
+            'train_date':self.trainDate,
             'back_train_date':time.strftime("%Y-%m-%d", time.localtime(time.time())),
             'tour_flag':'dc',  # dc 单程
             'purpose_codes':'ADULT',  # adult 成人票
@@ -350,7 +354,7 @@ class Train(object):
         # 6 getQueueCount+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
         url = 'https://kyfw.12306.cn/otn/confirmPassenger/getQueueCount'
-        dateGMT = time.strftime('%a %b %d %Y %H:%M:%S  GMT+0800', time.strptime(trainDate, '%Y-%m-%d'))
+        dateGMT = time.strftime('%a %b %d %Y %H:%M:%S  GMT+0800', time.strptime(self.trainDate, '%Y-%m-%d'))
         # data = 'train_date={}&train_no={}&stationTrainCode={}&seatType={}&fromStationTelecode={}&toStationTelecode={}&leftTicket={}&purpose_codes=00&train_location={}&_json_att=&REPEAT_SUBMIT_TOKEN={}'.format(
         #     dateGMT,self.trainNo,self.trainCode,self.seatType,self.fromStationTelecode,self.toStationTelecode,self.leftTicket,self.trainLocation,self.submitToken
         # )
