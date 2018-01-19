@@ -417,6 +417,7 @@ class Train(object):
             print('取消次数过多，今日不能继续订票')
             sys.exit()
         else:
+            self.orderId = result['data']['orderId']
             print('订单提交结果：%s' % result)
 
         # 8 resultOrderForDcQueue+++++++++++++++++++++++++++++++++++++++++
