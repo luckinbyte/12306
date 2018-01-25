@@ -273,7 +273,7 @@ class Train(object):
 
     @whileTrue
     def bookingTicket(self, *args):
-        t.findTicket('查询出错', 30)
+        self.findTicket('查询出错', 30)
         # 1 checkUser +++++++++++++++++++++++++++++++++++++++++++++
         self.session.headers['Referer'] = 'https://kyfw.12306.cn/otn/leftTicket/init'
         url = 'https://kyfw.12306.cn/otn/login/checkUser'
