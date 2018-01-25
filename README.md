@@ -7,6 +7,7 @@
 - fromStationName = 起点站
 - toStationName = 终点站
 - chooseSeat = 选择座位
+- 使用python3
 ## 改写于： https://github.com/yintenaite
 
 

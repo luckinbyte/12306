@@ -210,7 +210,7 @@ class Train(object):
                         trainDetailSplit = train.split('|')
                         if trainTemp == trainDetailSplit[3]:
                             for seat in chooseSeat:
-                                if trainDetailSplit[seatChange[seat]] != '' and trainDetailSplit[seatChange[seat]] != u'无':
+                                if trainDetailSplit[seatChange[seat]] != '' and trainDetailSplit[seatChange[seat]] != u'无' and trainDetailSplit[seatChange[seat]] != u'*'::
                                     self.seatType = seat
                                     break 
                             if self.seatType != '':
