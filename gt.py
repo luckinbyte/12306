@@ -204,6 +204,7 @@ class Train(object):
             self.getjson('查询出现错误，退出程序', 30)
             trainList = self.getjsonback['data']['result']
             trainDetailSplit = []
+            self.seatType = ''
             for trainTemp in trainName:
                 if trainDetailSplit == []:
                     for train in trainList:
