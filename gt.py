@@ -1,20 +1,12 @@
 # -*- coding:utf-8 -*-  
 import requests
 import sys
-import message
 import json
 import time
 import re
 import os
 from PIL import Image
 
-trainName = []
-player = ''
-trainDateList = []
-fromStationName = ''
-toStationName = ''
-#硬座 : '1', 一等 : 'M', 二等 : 'O',  硬卧 : '3', 软卧 : '4'         
-chooseSeat = ['O','4']
 
 seatChange = {'O':30, 'M':31, '1':29, '3':28, '4':23}
 headers = {
@@ -136,8 +128,8 @@ class Train(object):
         print('用户名密码登录')
         loginUrl = 'https://kyfw.12306.cn/passport/web/login'
         data = {
-            'username': message.userName,
-            'password': message.password,
+            'username': userName,
+            'password': password,
             'appid' : 'otn'
         }
 

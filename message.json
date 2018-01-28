@@ -1,0 +1,11 @@
+{
+	"userName":"",
+	"password":"",
+	"trainName":[""],
+	"player":"",
+	"trainDateList":[""],
+	"fromStationName":"",
+	"toStationName":"",
+	"座位注释":{"硬座":"1", "一等": "M", "二等": "O",  "硬卧": "3", "软卧": "4"},       
+	"chooseSeat":["",""]
+}
