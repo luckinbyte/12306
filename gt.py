@@ -331,7 +331,7 @@ class Train(object):
             'REPEAT_SUBMIT_TOKEN' : self.submitToken
         }
 
-        self.postjson('正在获取乘客信息出现错误，退出程序', 100, url, data)
+        self.postjson('正在获取乘客信息出现错误，退出程序', 15, url, data)
         result = self.getjsonback
         print('获取信息成功')
         pd = self.choosePassenger(result)
@@ -349,7 +349,7 @@ class Train(object):
             self.passengerTicketStr,self.oldPassengerStr,self.submitToken
         )
         data = requests.utils.requote_uri(data)
-        self.postjson('验证订单失败，退出程序', 100, url, data)
+        self.postjson('验证订单失败，退出程序', 15, url, data)
         result = self.getjsonback
 
 
@@ -373,7 +373,7 @@ class Train(object):
             '_json_att' : '',
             'REPEAT_SUBMIT_TOKEN' : self.submitToken
         }
-        self.postjson('getQueueCount有误，退出程序', 100, url, data)
+        self.postjson('getQueueCount有误，退出程序', 15, url, data)
         result = self.getjsonback
 
         # 7 confirmSingleForQueue++++++++++++++++++++++++++++++++++++++++++++++++++
