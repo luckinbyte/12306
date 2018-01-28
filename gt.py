@@ -211,7 +211,7 @@ class Train(object):
                         trainDetailSplit = train.split('|')
                         if trainTemp == trainDetailSplit[3]:
                             for seat in chooseSeat:
-                                if trainDetailSplit[seatChange[seat]] != '' and trainDetailSplit[seatChange[seat]] != u'无' and trainDetailSplit[seatChange[seat]] != u'*'::
+                                if trainDetailSplit[seatChange[seat]] != '' and trainDetailSplit[seatChange[seat]] != u'无' and trainDetailSplit[seatChange[seat]] != u'*':
                                     self.seatType = seat
                                     break 
                             if self.seatType != '':
@@ -246,7 +246,7 @@ class Train(object):
                             if not result['data']['flag'] :
                                 print('用户未登录checkUser')
                                 userCheckError += 1
-                                self.login()
+                                self.login('登录出错', 10)
                                 continue
                             break
                         except:
@@ -275,15 +275,16 @@ class Train(object):
     @whileTrue
     def bookingTicket(self, *args):
         self.findTicket('查询出错', 30)
+
         # 1 checkUser +++++++++++++++++++++++++++++++++++++++++++++
         self.session.headers['Referer'] = 'https://kyfw.12306.cn/otn/leftTicket/init'
         url = 'https://kyfw.12306.cn/otn/login/checkUser'
+
         result = self.session.post(url).json()
         print('验证登录状态checkUser')
         if not result['data']['flag'] :
             print('用户未登录checkUser')
-            userCheckError += 1
-            self.login()
+            self.login('登录出错', 10)
         print('验证登录状态成功checkUser')
 
         # 2 submitOrderRequest+++++++++++++++++++++++++++++++++++++
@@ -301,13 +302,12 @@ class Train(object):
         data = str(data)[1:-1].replace(':','=').replace(',','&').replace(' ','').replace('\'','')
         data = requests.utils.requote_uri(data)
         
-        self.postjson('提交订单出现错误，退出程序', 100, url, data)
+        self.postjson('提交订单出现错误，退出程序', 15, url, data)
         result = self.getjsonback
         
         print('submitOrderRequest+++++')
-        print(result)
         if not result['status']:
-            print('提交订单失败 status = {}'.format(result['status']))
+            print('提交订单失败 status = {}'.format(result))
             sys.exit()
         print('提交订单成功')
 
@@ -400,7 +400,7 @@ class Train(object):
         self.postjson('订票有误，退出程序', 10, url, data)
         result = self.getjsonback
         if not result['data']['submitStatus']:
-            print('订票失败，退出程序')
+            print('订票失败，退出程序:%s' % result)
             sys.exit()
 
         # 8 queryOrderWaitTime+++++++++++++++++++++++++++++++++++++++++
@@ -411,16 +411,27 @@ class Train(object):
         self.getjsonurl = url
         self.getjson('queryOrderWaitTime错误，退出程序', 10)
         result = self.getjsonback
-        resultCode = result['data']['waitTime']
-        if resultCode == -1:
-            self.orderId = result['data']['orderId']
-            print('订单提交成功')
-        elif resultCode == -2:
-            print('取消次数过多，今日不能继续订票')
-            sys.exit()
+        if "orderId" in result["data"] and result["data"]["orderId"] is not None:
+            if result['data']['count'] == 0:
+                self.orderId = result['data']['orderId']
+                print('订单提交成功：%s' % result)
+            else:
+                self.orderId = result['data']['orderId']
+                print('订单排队：%s' % result)
         else:
-            self.orderId = result['data']['orderId']
             print('订单提交结果：%s' % result)
+
+        #resultCode = result['data']['waitTime']
+        # if resultCode == -1:
+        #     self.orderId = result['data']['orderId']
+        #     print('订单提交成功')
+        # elif resultCode == -2:
+        #     print('err result:%s' % result)
+        #     #print('取消次数过多，今日不能继续订票')
+        #     sys.exit()
+        # else:
+        #     self.orderId = result['data']['orderId']
+        #     print('订单提交结果：%s' % result)
 
         # 8 resultOrderForDcQueue+++++++++++++++++++++++++++++++++++++++++
 
@@ -432,7 +443,7 @@ class Train(object):
         if result['data']['submitStatus']:
             print('订票成功，请登录12306查看')
         else:
-            print('查询订单有误,请登录12306查看具体订单情况')
+            print('查询订单有误,请登录12306查看具体订单情况 %s' % result)
 
 
 if __name__ == "__main__":
