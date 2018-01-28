@@ -293,7 +293,6 @@ class Train(object):
         }
         data = str(data)[1:-1].replace(':','=').replace(',','&').replace(' ','').replace('\'','')
         data = requests.utils.requote_uri(data)
-        
         self.postjson('提交订单出现错误，退出程序', 15, url, data)
         result = self.getjsonback
         
@@ -439,6 +438,19 @@ class Train(object):
 
 
 if __name__ == "__main__":
+    jsonname = sys.argv[1]
+    f = open("%s.json"%jsonname, encoding='utf-8')  
+    setting = json.load(f)
+    userName = setting["userName"]
+    password = setting["password"]
+    trainName = setting["trainName"]
+    player = setting["player"]
+    trainDateList = setting["trainDateList"]
+    fromStationName = setting["fromStationName"]
+    toStationName = setting["toStationName"]
+    #硬座 : '1', 一等 : 'M', 二等 : 'O',  硬卧 : '3', 软卧 : '4'         
+    chooseSeat = setting["chooseSeat"]
+
     if os.path.exists('./stationCode.txt'):
         pass
     else:
