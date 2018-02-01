@@ -33,8 +33,8 @@ def whileTrue(fn):
             try:
                 fn(*args)
                 break
-            except:
-                #print(msg, err)
+            except Exception as e:
+                print(msg, e)
                 time.sleep(0.1+err/10)
                 err += 1
     return whileTruefun
@@ -81,7 +81,7 @@ class Train(object):
         return '|'.join(cList)
 
     @whileTrue
-    def captchaCheck(self, *args):                  
+    def captchaCheck(self, *args):                
         captchaRes = self.session.get(
             'https://kyfw.12306.cn/passport/captcha/captcha-image?login_site=E&module=login&rand=sjrand&0.46630622142659206')
         captcha = captchaRes.content
@@ -113,15 +113,15 @@ class Train(object):
     @whileTrue
     def login(self, *args):
         # 1 伪装cookie++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        url = 'https://kyfw.12306.cn/otn/HttpZF/logdevice?algID=WYEdoc45yu&hashCode=EhTtj7Znzyie6I21jpgekYReLAnA8fyGEB4VlIGbF0g&FMQw=0&q4f3=zh-CN&VPIf=1&custID=133&VEek=unknown&dzuS=20.0%20r0&yD16=0&EOQP=895f3bf3ddaec0d22b6f7baca85603c4&lEnu=3232235778&jp76=e8eea307be405778bd87bbc8fa97b889&hAqN=Win32&platform=WEB&ks0Q=2955119c83077df58dd8bb7832898892&TeRS=728x1366&tOHY=24xx768x1366&Fvje=i1l1o1s1&q5aJ=-8&wNLf=99115dfb07133750ba677d055874de87&0aew={}&E3gR=abfdbb80598e02f8aa71b2b330daa098&timestamp={}'.format(
-            self.session.headers['User-Agent'], str(round(time.time() * 1000)))
-        response = self.session.get(requests.utils.requote_uri(url))
-        pattern = re.compile('\(\'(.*?)\'\)')
-        userVerify3 = eval(pattern.findall(response.text)[0])
-        railExpiration = userVerify3['exp']
-        railDeviceId = userVerify3['dfp']
-        self.session.cookies['RAIL_EXPIRATION'] = railExpiration
-        self.session.cookies['RAIL_DEVICEID'] = railDeviceId
+        # url = 'https://kyfw.12306.cn/otn/HttpZF/logdevice?algID=WYEdoc45yu&hashCode=EhTtj7Znzyie6I21jpgekYReLAnA8fyGEB4VlIGbF0g&FMQw=0&q4f3=zh-CN&VPIf=1&custID=133&VEek=unknown&dzuS=20.0%20r0&yD16=0&EOQP=895f3bf3ddaec0d22b6f7baca85603c4&lEnu=3232235778&jp76=e8eea307be405778bd87bbc8fa97b889&hAqN=Win32&platform=WEB&ks0Q=2955119c83077df58dd8bb7832898892&TeRS=728x1366&tOHY=24xx768x1366&Fvje=i1l1o1s1&q5aJ=-8&wNLf=99115dfb07133750ba677d055874de87&0aew={}&E3gR=abfdbb80598e02f8aa71b2b330daa098&timestamp={}'.format(
+        #     self.session.headers['User-Agent'], str(round(time.time() * 1000)))
+        # response = self.session.get(requests.utils.requote_uri(url))
+        # pattern = re.compile('\(\'(.*?)\'\)')
+        # userVerify3 = eval(pattern.findall(response.text)[0])
+        # railExpiration = userVerify3['exp']
+        # railDeviceId = userVerify3['dfp']
+        # self.session.cookies['RAIL_EXPIRATION'] = railExpiration
+        # self.session.cookies['RAIL_DEVICEID'] = railDeviceId
         #2 做验证码验证++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         self.captchaCheck('验证码验证出错', 10)
         #3 用户名密码登陆++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -194,26 +194,25 @@ class Train(object):
             self.trainDate = trainDate
             self.getjsonurl = queryUrl
             self.getjson('查询出现错误，退出程序', 30)
-            trainList = self.getjsonback['data']['result']
+            trainList1 = self.getjsonback['data']['result']
+            trainDict = {}
+            for temp in trainList1:
+                sp = temp.split('|')
+                if sp[3] in trainName:
+                    trainDict[sp[3]] = sp
             trainDetailSplit = []
             self.seatType = ''
             for trainTemp in trainName:
-                if trainDetailSplit == []:
-                    for train in trainList:
-                        trainDetailSplit = train.split('|')
-                        if trainTemp == trainDetailSplit[3]:
-                            for seat in chooseSeat:
-                                if trainDetailSplit[seatChange[seat]] != '' and trainDetailSplit[seatChange[seat]] != u'无' and trainDetailSplit[seatChange[seat]] != u'*':
-                                    self.seatType = seat
-                                    break 
-                            if self.seatType != '':
-                                break
-                            else:
-                                trainDetailSplit = [] 
-                        else:
-                            trainDetailSplit = [] 
-                else:
-                    break
+                if trainTemp in trainDict:
+                    trainDetailSplit = trainDict[trainTemp]
+                    for seat in chooseSeat:
+                        if trainDetailSplit[seatChange[seat]] != '' and trainDetailSplit[seatChange[seat]] != u'无' and trainDetailSplit[seatChange[seat]] != u'*':
+                            self.seatType = seat
+                            break 
+                    if self.seatType != '':
+                        break
+                    else:
+                        trainDetailSplit = []
             if trainDetailSplit != []:
                 self.trainSecretStr = trainDetailSplit[0]
                 self.trainNo = trainDetailSplit[2]
@@ -293,7 +292,7 @@ class Train(object):
         }
         data = str(data)[1:-1].replace(':','=').replace(',','&').replace(' ','').replace('\'','')
         data = requests.utils.requote_uri(data)
-        self.postjson('提交订单出现错误，退出程序', 15, url, data)
+        self.postjson('提交订单出现错误，退出程序', 5, url, data)
         result = self.getjsonback
         
         print('submitOrderRequest+++++')
@@ -456,7 +455,7 @@ if __name__ == "__main__":
     else:
         downloadStations('', '下载城市数据出错', 10)   
     t = Train()
-    t.login('登录出错', 10)
+    t.login('登录出错', 15)
 
     with open('stationCode.txt', 'r', encoding='utf-8') as f:
         stationsStr = f.read()
